@@ -17,33 +17,38 @@ public class BasicBrowserTest {
     
     @BeforeMethod
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        options.addArguments("--disable-notifications");
-        
-        driver = new ChromeDriver(options);
-        
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        try {
+            WebDriverManager.chromedriver().setup();
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--window-size=1920,1080");
+            driver = new ChromeDriver(options);
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+        } catch (Exception e) {
+            System.err.println("Error during WebDriver setup: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @Test(description = "Open example.com and verify URL")
     public void testOpenExampleAndVerifyURL() {
-        driver.get("https://www.example.com");
-        
-        String expectedURL = "https://www.example.com/";
-        String actualURL = driver.getCurrentUrl();
-        System.out.println("Actual URL: " + actualURL);
-        System.out.println("Expected URL: " + expectedURL);
-        Assert.assertEquals(actualURL, expectedURL, "URL verification failed!");
+        try {
+            driver.get("https://www.example.com");
+            String expectedURL = "https://www.example.com/";
+            String actualURL = driver.getCurrentUrl();
+            Assert.assertEquals(actualURL, expectedURL, "URL verification failed!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @AfterMethod
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        driver.quit();
     }
 }
 
